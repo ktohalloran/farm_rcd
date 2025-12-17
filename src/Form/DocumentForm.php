@@ -12,6 +12,7 @@ use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\farm_rcd\DocumentGeneratorInterface;
 use Drupal\file\FileInterface;
 use Drupal\plan\Entity\PlanInterface;
@@ -29,6 +30,7 @@ class DocumentForm extends PlanningWorkflowFormBase {
     protected DocumentGeneratorInterface $documentGenerator,
     protected FileSystemInterface $fileSystem,
     protected FileUrlGeneratorInterface $fileUrlGenerator,
+    protected MailManagerInterface $mailManager,
   ) {
     parent::__construct($this->entityTypeManager);
   }
@@ -148,9 +150,8 @@ class DocumentForm extends PlanningWorkflowFormBase {
    *   The current state of the form.
    */
   public function submitEmail (array &$form, FormStateInterface $form_state) {
-
-    // Temporary proof-of-concept to show that button is hooked up correctly.
-    \Drupal::logger('farm_rcd')->info($form_state->getValue(['document', 'email']));
+    $email_address = $form_state->getValue(['document', 'email']);
+    $this->mailManager->mail('farm_rcd', 'practice_document_stakeholder', $email_address, 'en');
   }
 
   /**
