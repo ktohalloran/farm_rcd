@@ -75,11 +75,25 @@ class DocumentForm extends PlanningWorkflowFormBase {
       ],
     ];
 
+    $form['document']['email'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Email address'),
+      '#description' => $this->t('Use this to specify an email address to receive one or more documents, if desired.'),
+      '#default_value' => $this->intake->get('intake_stakeholder_email')->value ?? '',
+    ];
+
     // Save documents button.
     $form['document']['actions'] = [
       '#type' => 'actions',
       '#weight' => 1000,
     ];
+
+    $form['document']['actions']['email'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Email document'),
+      '#submit' => [[$this, 'submitEmail']],
+    ];
+
     $form['document']['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Save documents'),
@@ -123,6 +137,20 @@ class DocumentForm extends PlanningWorkflowFormBase {
     catch (\Exception $e) {
       $this->messenger()->addWarning($this->t('Document generation failed. @error', ['@error' => $e->getMessage()]));
     }
+  }
+
+  /**
+   * Submit function for generating and sending an email with chosen documents.
+   *
+   * @param array $form
+   *   An associative array containing the structure of the form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   */
+  public function submitEmail (array &$form, FormStateInterface $form_state) {
+
+    // Temporary proof-of-concept to show that button is hooked up correctly.
+    \Drupal::logger('farm_rcd')->info($form_state->getValue(['document', 'email']));
   }
 
   /**
