@@ -43,6 +43,18 @@ class DocumentForm extends PlanningWorkflowFormBase {
   }
 
   /**
+   * Utility for getting RCP documents.
+   */
+  private function getPlanDocuments() {
+    $filenames = [];
+    $files = $this->plan->get('file')->referencedEntities();
+    foreach ($files as $file) {
+      $filenames[] = $file->label();
+    }
+    return $filenames;
+}
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, ?PlanInterface $plan = NULL) {
@@ -82,6 +94,13 @@ class DocumentForm extends PlanningWorkflowFormBase {
       '#title' => $this->t('Email address'),
       '#description' => $this->t('Use this to specify an email address to receive one or more documents, if desired.'),
       '#default_value' => $this->intake->get('intake_stakeholder_email')->value ?? '',
+    ];
+
+    $form['document']['include_docs'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Documents to email'),
+      '#description' => $this->t('Which documents should be included in the email?'),
+      '#options' => $this->getPlanDocuments(),
     ];
 
     // Save documents button.
