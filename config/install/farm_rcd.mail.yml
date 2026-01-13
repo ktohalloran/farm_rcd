@@ -18,7 +18,7 @@ intake_assigned_staff:
     A Resource Conservation Plan has been started here:
 
     [plan:url:absolute]
-  practice_document_stakeholder:
-    subject: 'Resource Conservation Plan Documents'
-    body: |-
-      Hello world!
+practice_document_stakeholder:
+  subject: 'Resource Conservation Plan Documents'
+  body: |-
+    Hello world!

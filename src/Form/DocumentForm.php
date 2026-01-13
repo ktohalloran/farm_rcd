@@ -49,7 +49,7 @@ class DocumentForm extends PlanningWorkflowFormBase {
     $filenames = [];
     $files = $this->plan->get('file')->referencedEntities();
     foreach ($files as $file) {
-      $filenames[] = $file->label();
+      $filenames[$file->id()] = $file->label();
     }
     return $filenames;
 }
@@ -170,7 +170,24 @@ class DocumentForm extends PlanningWorkflowFormBase {
    */
   public function submitEmail (array &$form, FormStateInterface $form_state) {
     $email_address = $form_state->getValue(['document', 'email']);
-    $this->mailManager->mail('farm_rcd', 'practice_document_stakeholder', $email_address, 'en');
+    $document_fids = $form_state->getValue(['document', 'include_docs']);
+
+    // Filter out empty values for files that were not selected.
+    $selected_fids = [];
+    foreach ($document_fids as $fid) {
+      if ($fid) {
+        $selected_fids[] = $fid;
+      }
+    }
+
+    // Attach fids to email content.
+    $email_content = [
+      'doc_ids' => $selected_fids,
+      'name' => 'Test',
+    ];
+    $params['message'] = $email_content;
+
+    $this->mailManager->mail('farm_rcd', 'practice_document_stakeholder', $email_address, 'en', $params);
   }
 
   /**
