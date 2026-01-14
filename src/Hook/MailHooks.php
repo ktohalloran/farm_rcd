@@ -28,23 +28,6 @@ class MailHooks {
    */
   #[Hook('mail')]
   public function mail($key, &$message, $params): void {
-    // If this is an email to send documents to the stakeholder, get file details and attach to email.
-    if ($key === 'practice_document_stakeholder') {
-
-        if ($params['message']['doc_ids']) {
-          foreach ($params['message']['doc_ids'] as $doc_id) {
-            $file_entity = File::load($doc_id);
-            $file = (object) [
-              'filename' => $file_entity->getFilename(),
-              'uri' => $file_entity->getFileUri(),
-              'filemime' => $file_entity->getMimeType(),
-            ];
-
-            $message['params']['attachments'][] = $file;
-          }
-        }
-    }
-
     $mail_config = $this->configFactory->get('farm_rcd.mail');
     $message['subject'] .= PlainTextOutput::renderFromHtml($this->token->replace($mail_config->get($key . '.subject'), $params));
     $message['body'][] = $this->token->replace($mail_config->get($key . '.body'), $params);

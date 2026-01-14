@@ -12,10 +12,13 @@ use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\farm_rcd\DocumentGeneratorInterface;
+use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\plan\Entity\PlanInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 /**
  * Document form.
@@ -30,7 +33,8 @@ class DocumentForm extends PlanningWorkflowFormBase {
     protected DocumentGeneratorInterface $documentGenerator,
     protected FileSystemInterface $fileSystem,
     protected FileUrlGeneratorInterface $fileUrlGenerator,
-    protected MailManagerInterface $mailManager,
+    #[Autowire(service: 'mailer')]
+    protected MailerInterface $mailManager,
   ) {
     parent::__construct($this->entityTypeManager);
   }
@@ -180,14 +184,24 @@ class DocumentForm extends PlanningWorkflowFormBase {
       }
     }
 
-    // Attach fids to email content.
-    $email_content = [
-      'doc_ids' => $selected_fids,
-      'name' => 'Test',
-    ];
-    $params['message'] = $email_content;
+    $email = (new Email())
+      ->from('test@test.com')
+      ->to($email_address)
+      ->subject('RCD docs test')
+      ->text('Testing');
 
-    $this->mailManager->mail('farm_rcd', 'practice_document_stakeholder', $email_address, 'en', $params);
+    if (count($selected_fids)) {
+      foreach ($selected_fids as $fid) {
+        $file_entity = File::load($fid);
+        $email->attachFromPath(
+          $file_entity->getFileUri(),
+          $file_entity->getFilename(),
+          $file_entity->getMimeType()
+        );
+      }
+    }
+
+    $this->mailManager->send($email);
   }
 
   /**
