@@ -10,10 +10,17 @@
       "email": "mike@farmier.com"
     }
   ],
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    }
+  ],
   "require": {
     "drupal/tagify": "^1.2",
     "farmos/farmos": "^4",
     "phpoffice/phpword": "^1.4",
-    "ext-mbstring": "*"
+    "ext-mbstring": "*",
+    "drupal/symfony_mailer_lite": "^2.0"
   }
 }
