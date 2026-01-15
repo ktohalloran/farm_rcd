@@ -248,6 +248,14 @@ class IntakeForm extends FormBase {
       '#required' => TRUE,
     ];
 
+    // Send stakeholder email toggle. Don't display to anonymous users.
+    $form['personal']['send_email'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Send email to stakeholder'),
+      '#default_value' => TRUE,
+      '#access' => $this->currentUser()->id() > 0,
+    ];
+
     // Stakeholder phone.
     $form['personal']['phone'] = [
       '#type' => 'textfield',
@@ -817,8 +825,9 @@ class IntakeForm extends FormBase {
       return;
     }
 
-    // Save the generated log to form state storage.
-    $form_state->setStorage(['log' => $log]);
+    // Save the generated saved values and log to form state storage. Saving saved_values allows us to access
+    // properties like send_email later that won't be available on the log.
+    $form_state->setStorage(['saved_values' => $saved_values, 'log' => $log]);
   }
 
   /**
@@ -836,7 +845,8 @@ class IntakeForm extends FormBase {
     $storage['log']->save();
 
     // Email the stakeholder and RCD staff.
-    if (!$storage['log']->get('intake_stakeholder_email')->isEmpty()) {
+    $send_stakeholder_email = $storage['saved_values']['stakeholder']['personal']['send_email'];
+    if (!$storage['log']->get('intake_stakeholder_email')->isEmpty() && $send_stakeholder_email) {
       $this->mailManager->mail('farm_rcd', 'intake_received_stakeholder', $storage['log']->get('intake_stakeholder_email')->value, 'en');
     }
     if (!empty($this->configFactory()->get('farm_rcd.settings')->get('intake_email'))) {
