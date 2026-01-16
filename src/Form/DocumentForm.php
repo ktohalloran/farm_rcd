@@ -16,8 +16,7 @@ use Drupal\farm_rcd\DocumentGeneratorInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\plan\Entity\PlanInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Email;
 
 /**
@@ -33,8 +32,6 @@ class DocumentForm extends PlanningWorkflowFormBase {
     protected DocumentGeneratorInterface $documentGenerator,
     protected FileSystemInterface $fileSystem,
     protected FileUrlGeneratorInterface $fileUrlGenerator,
-    #[Autowire(service: 'mailer')]
-    protected MailerInterface $mailManager,
   ) {
     parent::__construct($this->entityTypeManager);
   }
@@ -175,6 +172,7 @@ class DocumentForm extends PlanningWorkflowFormBase {
   public function submitEmail (array &$form, FormStateInterface $form_state) {
     $email_address = $form_state->getValue(['document', 'email']);
     $document_fids = $form_state->getValue(['document', 'include_docs']);
+    $mail_manager = \Drupal::service('symfony_mailer_lite.mailer');
 
     // Filter out empty values for files that were not selected.
     $selected_fids = [];
@@ -185,7 +183,7 @@ class DocumentForm extends PlanningWorkflowFormBase {
     }
 
     $email = (new Email())
-      ->from('test@test.com')
+      ->from('test@barnowl.io')
       ->to($email_address)
       ->subject('RCD docs test')
       ->text('Testing');
@@ -201,7 +199,7 @@ class DocumentForm extends PlanningWorkflowFormBase {
       }
     }
 
-    $this->mailManager->send($email);
+    $mail_manager->send($email);
   }
 
   /**
