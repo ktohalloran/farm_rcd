@@ -42,7 +42,6 @@ class RcdOptionLists {
       'hispanic' => t('Hispanic or Latino'),
       'asian' => t('Asian'),
       'pacific' => t('Pacific Islander'),
-      'na' => t('Not applicable'),
       'optout' => t('Prefer not to answer'),
     ];
   }
