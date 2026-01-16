@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\farm_rcd\Form;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -16,7 +17,6 @@ use Drupal\farm_rcd\DocumentGeneratorInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\plan\Entity\PlanInterface;
-use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Email;
 
 /**
@@ -173,6 +173,8 @@ class DocumentForm extends PlanningWorkflowFormBase {
     $email_address = $form_state->getValue(['document', 'email']);
     $document_fids = $form_state->getValue(['document', 'include_docs']);
     $mail_manager = \Drupal::service('symfony_mailer_lite.mailer');
+    $mail_config = $this->configFactory()->get('farm_rcd.mail');
+    $mail_key = 'practice_document_stakeholder';
 
     // Filter out empty values for files that were not selected.
     $selected_fids = [];
@@ -183,10 +185,10 @@ class DocumentForm extends PlanningWorkflowFormBase {
     }
 
     $email = (new Email())
-      ->from('test@barnowl.io')
+      ->from($this->configFactory()->get('system.site')->get('mail'))
       ->to($email_address)
-      ->subject('RCD docs test')
-      ->text('Testing');
+      ->subject($mail_config->get($mail_key . '.subject'))
+      ->text($mail_config->get($mail_key . '.body'));
 
     if (count($selected_fids)) {
       foreach ($selected_fids as $fid) {

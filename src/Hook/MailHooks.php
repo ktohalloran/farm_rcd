@@ -9,7 +9,6 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Utility\Token;
-use Drupal\file\Entity\File;
 
 /**
  * Mail hook implementations for farm_rcd.
