@@ -89,3 +89,16 @@ function farm_rcd_post_update_rcp_document(&$sandbox) {
     'body' => 'Your prepared Resource Conservation Plan document(s) are attached.',
   ])->save();
 }
+
+/**
+ * Add "other" demographic group field to intake log.
+ */
+function farm_rcd_post_update_intake_other_group(&$sandbox) {
+
+  $options = [
+    'type' => 'string',
+    'label' => t('Stakeholder group (other)'),
+  ];
+  $field_definition = \Drupal::service('farm_field.factory')->bundleFieldDefinition($options);
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('intake_stakeholder_group_other', 'log', 'farm_rcd', $field_definition);
+}
