@@ -514,16 +514,16 @@ class IntakeForm extends FormBase {
       '#required' => TRUE,
     ];
 
-    // Grazing acreage.
-    $form['land_use']['grazing_acreage'] = [
+    // Rangeland acreage.
+    $form['land_use']['rangeland_acreage'] = [
       '#type' => 'number',
-      '#title' => $this->t('Grazing acreage'),
+      '#title' => $this->t('Rangeland acreage'),
       '#min' => 0,
       '#step' => 0.1,
-      '#default_value' => $saved_values['land_use']['grazing_acreage'] ?? '',
+      '#default_value' => $saved_values['land_use']['rangeland_acreage'] ?? '',
       '#states' => [
         'visible' => [
-          ':input[name="property[land_use][land_use][grazing]"]' => ['checked' => TRUE],
+          ':input[name="property[land_use][land_use][rangeland]"]' => ['checked' => TRUE],
         ],
       ],
     ];
@@ -929,7 +929,7 @@ class IntakeForm extends FormBase {
       'intake_property_zip' => $saved_values['property']['info']['zip'],
       'intake_property_parcel_gps' => $saved_values['property']['info']['parcel_gps'],
       'intake_property_use' => $intake_property_use,
-      'intake_property_use_grazing_ac' => $saved_values['property']['land_use']['grazing_acreage'],
+      'intake_property_use_rangeland_ac' => $saved_values['property']['land_use']['rangeland_acreage'],
       'intake_property_use_vineyard_ac' => $saved_values['property']['land_use']['vineyards_acreage'],
       'intake_property_use_orchard_ac' => $saved_values['property']['land_use']['orchards_acreage'],
       'intake_property_use_rowcrop_ac' => $saved_values['property']['land_use']['rowcrops_acreage'],
