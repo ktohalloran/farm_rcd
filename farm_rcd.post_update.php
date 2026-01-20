@@ -118,3 +118,49 @@ function farm_rcd_post_update_install_farm_form(&$sandbox = NULL) {
     \Drupal::service('module_installer')->install(['farm_form']);
   }
 }
+
+/**
+ * Update intake form land use options.
+ */
+function farm_rcd_post_update_intake_land_use(&$sandbox) {
+  // Add intake_property_use_pasture_ac log field.
+  $options = [
+    'type' => 'decimal',
+    'label' => t('Pasture land use acreage'),
+    'min' => 0,
+  ];
+  $field_definition = \Drupal::service('farm_field.factory')->bundleFieldDefinition($options);
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('intake_property_use_pasture_ac', 'log', 'farm_rcd', $field_definition);
+
+  // Add intake_property_use_forestry_ac log field.
+  $options = [
+    'type' => 'decimal',
+    'label' => t('Forestry land use acreage'),
+    'min' => 0,
+  ];
+  $field_definition = \Drupal::service('farm_field.factory')->bundleFieldDefinition($options);
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('intake_property_use_forestry_ac', 'log', 'farm_rcd', $field_definition);
+
+  // Add intake_property_use_rangeland_ac log field.
+  $options = [
+    'type' => 'decimal',
+    'label' => t('Rangeland land use acreage'),
+    'min' => 0,
+  ];
+  $field_definition = \Drupal::service('farm_field.factory')->bundleFieldDefinition($options);
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('intake_property_use_rangeland_ac', 'log', 'farm_rcd', $field_definition);
+
+  // Migrate intake_property_use "grazing" to "rangeland".
+  \Drupal::database()->query("UPDATE log__intake_property_use SET intake_property_use_value = 'rangeland' WHERE intake_property_use_value = 'grazing'");
+  \Drupal::database()->query("UPDATE log_revision__intake_property_use SET intake_property_use_value = 'rangeland' WHERE intake_property_use_value = 'grazing'");
+
+  // Migrate values from intake_property_use_grazing_ac to
+  // intake_property_use_rangeland_ac.
+  \Drupal::database()->query("INSERT INTO log__intake_property_use_rangeland_ac (bundle, deleted, entity_id, revision_id, langcode, delta, intake_property_use_rangeland_ac_value) SELECT bundle, deleted, entity_id, revision_id, langcode, delta, intake_property_use_grazing_ac_value FROM log__intake_property_use_grazing_ac");
+  \Drupal::database()->query("INSERT INTO log_revision__intake_property_use_rangeland_ac (bundle, deleted, entity_id, revision_id, langcode, delta, intake_property_use_rangeland_ac_value) SELECT bundle, deleted, entity_id, revision_id, langcode, delta, intake_property_use_grazing_ac_value FROM log_revision__intake_property_use_grazing_ac");
+
+  // Remove intake_property_use_grazing_ac from log.
+  $update_manager = \Drupal::entityDefinitionUpdateManager();
+  $storage_definition = $update_manager->getFieldStorageDefinition('intake_property_use_grazing_ac', 'log');
+  $update_manager->uninstallFieldStorageDefinition($storage_definition);
+}
