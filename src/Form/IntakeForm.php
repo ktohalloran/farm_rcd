@@ -528,6 +528,20 @@ class IntakeForm extends FormBase {
       ],
     ];
 
+    // Pasture acreage.
+    $form['land_use']['pasture_acreage'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Pasture acreage'),
+      '#min' => 0,
+      '#step' => 0.1,
+      '#default_value' => $saved_values['land_use']['pasture_acreage'] ?? '',
+      '#states' => [
+        'visible' => [
+          ':input[name="property[land_use][land_use][pasture]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
     // Vineyards acreage.
     $form['land_use']['vineyards_acreage'] = [
       '#type' => 'number',
@@ -566,6 +580,20 @@ class IntakeForm extends FormBase {
       '#states' => [
         'visible' => [
           ':input[name="property[land_use][land_use][rowcrops]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
+    // Forestry acreage.
+    $form['land_use']['forestry_acreage'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Forestry acreage'),
+      '#min' => 0,
+      '#step' => 0.1,
+      '#default_value' => $saved_values['land_use']['forestry_acreage'] ?? '',
+      '#states' => [
+        'visible' => [
+          ':input[name="property[land_use][land_use][forestry]"]' => ['checked' => TRUE],
         ],
       ],
     ];

@@ -130,6 +130,11 @@ class Intake extends FarmLogType {
         'label' => $this->t('Grazing land use acreage'),
         'min' => 0,
       ],
+      'intake_property_use_pasture_ac' => [
+        'type' => 'decimal',
+        'label' => $this->t('Pasture land use acreage'),
+        'min' => 0,
+      ],
       'intake_property_use_vineyard_ac' => [
         'type' => 'decimal',
         'label' => $this->t('Vineyards land use acreage'),
@@ -143,6 +148,11 @@ class Intake extends FarmLogType {
       'intake_property_use_rowcrop_ac' => [
         'type' => 'decimal',
         'label' => $this->t('Row crops land use acreage'),
+        'min' => 0,
+      ],
+      'intake_property_use_forestry_ac' => [
+        'type' => 'decimal',
+        'label' => $this->t('Forestry land use acreage'),
         'min' => 0,
       ],
       'intake_property_use_natural_ac' => [
