@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - farm_rcd
+id: rcd_property_zoom
+label: Zoom to property
+description: 'Zooms to a property.'
+library: 'farm_rcd/behavior_rcd_property_zoom'
+settings: { }

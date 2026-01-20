@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Drupal\farm_map\Entity\MapBehavior;
 use Drupal\symfony_mailer_lite\Entity\Transport;
 
 /**
@@ -177,4 +178,28 @@ function farm_rcd_post_update_update_land_use_types(&$sandbox) {
   $update_manager = \Drupal::entityDefinitionUpdateManager();
   $storage_definition = $update_manager->getFieldStorageDefinition('intake_property_use_grazing_ac', 'log');
   $update_manager->uninstallFieldStorageDefinition($storage_definition);
+}
+
+
+/**
+ * Add zoom to property map behavior.
+ */
+function farm_rcd_post_update_map_zoom_to_property(&$sandbox) {
+
+  // Create the zoom behavior.
+  $zoom_behavior = MapBehavior::create([
+    'id' => 'rcd_property_zoom',
+    'label' => 'Zoom to property',
+    'description' => 'Zooms to a property.',
+    'library' => 'farm_rcd/behavior_rcd_property_zoom',
+    'settings' => [],
+    'dependencies' => [
+      'enforced' => [
+        'module' => [
+          'farm_rcd',
+        ],
+      ],
+    ],
+  ]);
+  $zoom_behavior->save();
 }

@@ -3,3 +3,8 @@ disable_forms:
     js/disable_forms.js: {}
   dependencies:
     - core/jquery
+behavior_rcd_property_zoom:
+  js:
+    js/farmOS.map.behaviors.rcd_property_zoom.js: { }
+  dependencies:
+    - farm_map/farm_map
