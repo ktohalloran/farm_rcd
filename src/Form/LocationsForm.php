@@ -66,7 +66,7 @@ class LocationsForm extends PlanningWorkflowFormBase {
     foreach ($this->landAssets as $id => $asset) {
 
       // Details wrapper.
-      $form['locations'][$id] = $this->buildLandAssetForm($this->property, $asset);
+      $form['locations'][$id] = $this->buildLandAssetForm($asset);
       $form['locations'][$id]['#type'] = 'details';
       $form['locations'][$id]['#title'] = $asset->label();
       $form['locations'][$id]['#description'] = $this->t('Land asset: <a href=":uri">%label</a>', [':uri' => $asset->toUrl()->toString(), '%label' => $asset->label()]);
@@ -74,7 +74,7 @@ class LocationsForm extends PlanningWorkflowFormBase {
     }
 
     // Add a new land asset.
-    $form['locations']['add'] = $this->buildLandAssetForm($this->property);
+    $form['locations']['add'] = $this->buildLandAssetForm();
     $form['locations']['add']['#type'] = 'details';
     $form['locations']['add']['#title'] = $this->t('+ Add land use area');
     $form['locations']['add']['#description'] = $this->t('Create a new land asset to represent a land use area associated with this property.');
@@ -110,7 +110,7 @@ class LocationsForm extends PlanningWorkflowFormBase {
    * @return array
    *   The render array defining the elements of the form.
    */
-  protected function buildLandAssetForm(AssetInterface $property, ?AssetInterface $asset = NULL) {
+  protected function buildLandAssetForm(?AssetInterface $asset = NULL) {
 
     // Asset ID (if available).
     $form['asset_id'] = [
@@ -161,17 +161,17 @@ class LocationsForm extends PlanningWorkflowFormBase {
     $form['boundary'] = [
       '#type' => 'farm_map_input',
       '#title' => $this->t('Boundary'),
-      '#description' => $this->t('Draw the boundary using the map below, or paste geometry data (WKT, KML, or GeoJSON) into the box below the map.'),
+      '#description' => $this->t('Draw the boundary using the map below, or paste geometry data (WKT, KML, or GeoJSON) into the box below the map. The property boundary is visible in blue and the current land use area is visible in orange.'),
       '#display_raw_geometry' => TRUE,
       '#default_value' => !is_null($asset) ? $asset->get('geometry')->value : '',
-      '#map_type' => 'rcd_land_usage',
+      '#map_type' => 'rcd',
       '#behaviors' => [
         'rcd_property_zoom',
       ],
       '#map_settings' => [
         'behaviors' => [
           'rcd_property_zoom' => [
-            'property_geometry' => $property->get('geometry')->value,
+            'property_geometry' => $this->property->get('geometry')->value,
           ],
         ],
       ],

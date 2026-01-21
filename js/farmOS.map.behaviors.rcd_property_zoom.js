@@ -2,7 +2,7 @@
     farmOS.map.behaviors.rcd_property_zoom = {
         attach: function (instance) {
             // Only attach to maps for editing land use areas.
-            if (instance.target.id.includes("rcd-land-usage")) {
+            if (instance.target.id.includes("farm-map-rcd")) {
                 // Create a layer for the property location.
                 const opts = {
                     title: 'Property',

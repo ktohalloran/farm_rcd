@@ -181,7 +181,6 @@ function farm_rcd_post_update_update_land_use_types(&$sandbox) {
   $update_manager->uninstallFieldStorageDefinition($storage_definition);
 }
 
-
 /**
  * Add zoom to property map behavior.
  */
@@ -206,17 +205,15 @@ function farm_rcd_post_update_map_zoom_to_property(&$sandbox) {
 }
 
 /**
- * Add land usage map type.
+ * Add RCD map type.
  */
-function farm_rcd_post_update_map_land_usage(&$sandbox) {
-  // Create the land usage map type.
-  $land_usage_type = MapType::create([
-    'id' => 'rcd_land_usage',
-    'label' => 'Land usage map',
-    'description' => 'Map for selecting land usage areas within a property.',
-    'behaviors' => [
-      'rcd_property_zoom',
-    ],
+function farm_rcd_post_update_map_type_rcd(&$sandbox) {
+  // Create the RCD map type.
+  $rcd_type = MapType::create([
+    'id' => 'rcd',
+    'label' => 'RCD map',
+    'description' => 'Map for RCD module use cases.',
+    'behaviors' => [],
     'options' => [],
     'dependencies' => [
       'enforced' => [
@@ -227,5 +224,5 @@ function farm_rcd_post_update_map_land_usage(&$sandbox) {
     ],
   ]);
 
-  $land_usage_type->save();
+  $rcd_type->save();
 }

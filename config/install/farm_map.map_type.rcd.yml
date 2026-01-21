@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - farm_rcd
+id: rcd
+label: RCD map
+description: 'Map for RCD module use cases.'
+behaviors: { }
+options: { }
