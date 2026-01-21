@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Drupal\farm_map\Entity\MapBehavior;
+use Drupal\farm_map\Entity\MapType;
 use Drupal\symfony_mailer_lite\Entity\Transport;
 
 /**
@@ -202,4 +203,29 @@ function farm_rcd_post_update_map_zoom_to_property(&$sandbox) {
     ],
   ]);
   $zoom_behavior->save();
+}
+
+/**
+ * Add land usage map type.
+ */
+function farm_rcd_post_update_map_land_usage(&$sandbox) {
+  // Create the land usage map type.
+  $land_usage_type = MapType::create([
+    'id' => 'rcd_land_usage',
+    'label' => 'Land usage map',
+    'description' => 'Map for selecting land usage areas within a property.',
+    'behaviors' => [
+      'rcd_property_zoom',
+    ],
+    'options' => [],
+    'dependencies' => [
+      'enforced' => [
+        'module' => [
+          'farm_rcd',
+        ],
+      ],
+    ],
+  ]);
+
+  $land_usage_type->save();
 }

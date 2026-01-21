@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - farm_rcd
+id: rcd_land_usage
+label: Land usage map
+description: 'Map for selecting land usage areas within a property.'
+behaviors:
+  - rcd_property_zoom
+options: { }
