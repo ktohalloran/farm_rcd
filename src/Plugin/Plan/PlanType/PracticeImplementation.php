@@ -85,6 +85,20 @@ class PracticeImplementation extends FarmPlanType {
         'description' => $this->t('How many linear feet will this practice cover?'),
       ],
 
+      // Start date.
+      'rcd_target_start_date' => [
+        'type' => 'timestamp',
+        'label' => $this->t('Target start date'),
+        'description' => $this->t('The intended start date for this practice implementation.'),
+      ],
+
+      // End date.
+      'rcd_target_end_date' => [
+        'type' => 'timestamp',
+        'label' => $this->t('Target end date'),
+        'description' => $this->t('The intended end date for this practice implementation.'),
+      ],
+
       // Funding source.
       'rcd_funding_source' => [
         'type' => 'string',

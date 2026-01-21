@@ -226,3 +226,24 @@ function farm_rcd_post_update_map_type_rcd(&$sandbox) {
 
   $rcd_type->save();
 }
+
+/**
+ * Add practice implementation target start and end date fields.
+ */
+function farm_rcd_post_update_add_implementation_timeline(&$sandbox) {
+  // Add practice implementation target start date.
+  $options = [
+    'type' => 'timestamp',
+    'label' => t('Target start date'),
+  ];
+  $field_definition = \Drupal::service('farm_field.factory')->bundleFieldDefinition($options);
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('rcd_target_start_date', 'plan', 'farm_rcd', $field_definition);
+
+  // Add practice implementation target end date.
+  $options = [
+    'type' => 'timestamp',
+    'label' => t('Target end date'),
+  ];
+  $field_definition = \Drupal::service('farm_field.factory')->bundleFieldDefinition($options);
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('rcd_target_end_date', 'plan', 'farm_rcd', $field_definition);
+}
