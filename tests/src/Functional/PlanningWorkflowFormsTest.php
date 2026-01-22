@@ -754,11 +754,15 @@ class PlanningWorkflowFormsTest extends RcdTestBase {
     $this->assertSession()->fieldValueEquals('practices[' . $practice_plan->id() . '][practice]', 'hedgerow_planting');
     $this->assertSession()->fieldValueEquals('practices[' . $practice_plan->id() . '][acreage]', '');
     $this->assertSession()->fieldValueEquals('practices[' . $practice_plan->id() . '][linear_feet]', '100.00');
+    $this->assertSession()->fieldValueEquals('practices[' . $practice_plan->id() . '][target_start_date]', NULL);
+    $this->assertSession()->fieldValueEquals('practices[' . $practice_plan->id() . '][target_end_date]', NULL);
     $this->assertSession()->fieldValueEquals('practices[' . $practice_plan->id() . '][notes]', $expected_notes);
     $this->assertSession()->fieldValueEquals('practices[' . $practice_plan->id() . '][status]', 'planning');
 
     // Edit the practice plan's fields and submit the form.
     $this->getSession()->getPage()->fillField('practices[' . $practice_plan->id() . '][linear_feet]', '101.00');
+    $this->getSession()->getPage()->fillField('practices[' . $practice_plan->id() . '][target_start_date]', date('Y-m-d', strtotime('today')));
+    $this->getSession()->getPage()->fillField('practices[' . $practice_plan->id() . '][target_end_date]', date('Y-m-d', strtotime('tomorrow')));
     $this->getSession()->getPage()->fillField('practices[' . $practice_plan->id() . '][notes]', 'Plant lots of tillage radish.');
     $this->getSession()->getPage()->fillField('practices[' . $practice_plan->id() . '][status]', 'implementing');
     $this->getSession()->getPage()->pressButton('Save conservation practices');
@@ -775,6 +779,8 @@ class PlanningWorkflowFormsTest extends RcdTestBase {
     $this->assertEquals('hedgerow_planting', $practice_plan->get('rcd_practice')->value);
     $this->assertTrue($practice_plan->get('rcd_acres')->isEmpty());
     $this->assertEquals(101, $practice_plan->get('rcd_linear_feet')->value);
+    $this->assertEquals(strtotime(date('Y-m-d', strtotime('today'))), $practice_plan->get('rcd_target_start_date')->value);
+    $this->assertEquals(strtotime(date('Y-m-d', strtotime('tomorrow'))), $practice_plan->get('rcd_target_end_date')->value);
     $this->assertEquals('Plant lots of tillage radish.', $practice_plan->get('notes')->value);
     $this->assertEquals('implementing', $practice_plan->get('status')->value);
 
