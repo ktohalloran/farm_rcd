@@ -22,6 +22,7 @@ class ViewsExecutionHooks {
     if ($view->id() == 'farm_plan') {
       // Get all filters.
       $filters = $view->display_handler->getOption('filters');
+      \Drupal::logger('farm_rcd')->debug(print_r($filters, TRUE));
 
       // Customize default target_start_date and target_end_date filters.
       if (isset($filters['rcd_target_start_date_value']) && isset($filters['rcd_target_end_date_value'])) {
@@ -31,6 +32,10 @@ class ViewsExecutionHooks {
         // Expose operator.
         $start_date_filter['expose']['use_operator'] = TRUE;
         $end_date_filter['expose']['use_operator'] = TRUE;
+
+        // Set default operator.
+        $start_date_filter['operator'] = "between";
+        $end_date_filter['operator'] = "between";
 
         // Remove previous versions of filters.
         unset($filters['rcd_target_start_date_value']);
