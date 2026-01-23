@@ -103,6 +103,11 @@ class PracticesReportForm extends FormBase {
         $items[] = $this->t('Total implementation plans: %count', ['%count' => count($results['plan_ids'])]);
       }
 
+      // Total farms.
+      if (!empty($results['farms'])) {
+        $items[] = $this->t('Total farms: %count', ['%count' => count($results['farms'])]);
+      }
+
       // Render the list of results.
       $form['results']['items'] = [
         '#theme' => 'item_list',
@@ -190,6 +195,18 @@ class PracticesReportForm extends FormBase {
       }
       if (!in_array($status, $context['results']['status'])) {
         $context['results']['status'][] = $status;
+      }
+    }
+
+    // Save the plan farm.
+    if (!$plan->get('farm')->isEmpty()) {
+      $farm = $plan->get('farm')->referencedEntities()[0];
+      $farm_id = $farm->id();
+      if (!isset($context['results']['farms'])) {
+        $context['results']['farms'] = [];
+      }
+      if (!in_array($farm_id, $context['results']['farms'])) {
+        $context['results']['farms'][] = $farm_id;
       }
     }
   }
