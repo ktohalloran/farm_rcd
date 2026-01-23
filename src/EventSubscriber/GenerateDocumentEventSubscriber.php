@@ -170,10 +170,22 @@ class GenerateDocumentEventSubscriber implements EventSubscriberInterface {
           elseif (!empty($plan->get('rcd_linear_feet')->value)) {
             $practice_measurement = ($plan->get('rcd_linear_feet')->value + 0) . ' linear feet';
           }
+          $practice_start = '';
+          if (!empty($plan->get('rcd_target_start_date')->value)) {
+            $start_timestamp = $plan->get('rcd_target_start_date')->value;
+            $practice_start = date('m/d/Y', (int) $start_timestamp);
+          }
+          $practice_end = '';
+          if (!empty($plan->get('rcd_target_end_date')->value)) {
+            $end_timestamp = $plan->get('rcd_target_end_date')->value;
+            $practice_end = date('m/d/Y', (int) $end_timestamp);
+          }
           $location_practices[] = [
             new StringPlaceholder('practice_name', $practice_name),
             new StringPlaceholder('practice_overview', $plan->get('notes')->value ?? ''),
             new StringPlaceholder('practice_measurement', $practice_measurement),
+            new StringPlaceholder('practice_start', $practice_start),
+            new StringPlaceholder('practice_end', $practice_end),
             new ListStringPlaceholder('practice_benefits', $practice_info['benefits']),
             new ListStringPlaceholder('practice_resources', $practice_info['resources']),
           ];

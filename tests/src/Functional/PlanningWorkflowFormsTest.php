@@ -924,6 +924,8 @@ class PlanningWorkflowFormsTest extends RcdTestBase {
       'rcd_practice' => 'other',
       'rcd_practice_other' => 'Bioremediation',
       'rcd_linear_feet' => 10,
+      'rcd_target_start_date' => strtotime('today'),
+      'rcd_target_end_date' => strtotime('tomorrow'),
     ]);
     $practice_plan1->save();
     $plan->set('practice_implementation_plan', [$practice_plan1, $practice_plan2]);
@@ -1205,6 +1207,8 @@ class PlanningWorkflowFormsTest extends RcdTestBase {
       'practice_name' => 'Cover crop',
       'practice_overview' => $plan->get('practice_implementation_plan')->referencedEntities()[0]->get('notes')->value,
       'practice_measurement' => '10 acres',
+      'practice_start' => date('m/d/Y', strtotime('today')),
+      'practice_end' => date('m/d/Y', strtotime('tomorrow')),
       'other_practice_name' => 'Bioremediation',
       'other_practice_measurement' => '10 linear feet',
       'other_practice_overview' => 'Plant a row of sunflowers!',
