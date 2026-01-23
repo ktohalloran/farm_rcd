@@ -6,6 +6,14 @@ farm_rcd.intake:
   requirements:
     _custom_access: '\Drupal\farm_rcd\Form\IntakeForm::access'
 
+farm_rcd.practices_report:
+  path: '/report/practices'
+  defaults:
+    _form: '\Drupal\farm_rcd\Form\PracticesReportForm'
+    _title: 'Practice implementation summary'
+  requirements:
+    _permission: 'access farm_rcd reports'
+
 farm_rcd.settings:
   path: 'farm/settings/rcd'
   defaults:

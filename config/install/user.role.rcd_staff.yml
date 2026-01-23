@@ -9,6 +9,8 @@ dependencies:
     - farm_flag
     - farm_id_tag
     - farm_land
+    - farm_rcd
+    - farm_report
     - farm_ui_dashboard
     - file
     - filter
@@ -30,6 +32,8 @@ permissions:
   - 'access comments'
   - 'access content'
   - 'access farm dashboard'
+  - 'access farm report index'
+  - 'access farm_rcd reports'
   - 'access log collection'
   - 'access organization collection'
   - 'access plan collection'

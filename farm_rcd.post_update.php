@@ -196,3 +196,12 @@ function farm_rcd_post_update_create_farm_rcd_intake_plan(&$sandbox = NULL) {
   $config_update = \Drupal::service('config_update.config_update');
   $config_update->import('view', 'farm_rcd_intake_plan');
 }
+
+/**
+ * Install the farm_report module.
+ */
+function farm_rcd_post_update_install_farm_report(&$sandbox = NULL) {
+  if (!\Drupal::service('module_handler')->moduleExists('farm_report')) {
+    \Drupal::service('module_installer')->install(['farm_report']);
+  }
+}

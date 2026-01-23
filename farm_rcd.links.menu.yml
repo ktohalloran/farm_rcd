@@ -5,3 +5,8 @@ farm_rcd.farms:
   route_parameters:
     arg_0: farm
   weight: -10
+
+farm_rcd.practices_report:
+  title: Practices
+  parent: farm.report
+  route_name: farm_rcd.practices_report
