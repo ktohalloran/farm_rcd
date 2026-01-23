@@ -114,13 +114,18 @@ class DocumentEmailForm extends PlanningWorkflowFormBase {
       ->subject($mail_config->get($mail_key . '.subject'))
       ->text($mail_config->get($mail_key . '.body'));
 
-    // Attach documents.
+    // Attach documents and save filenames.
+    $filenames = [];
     if (count($selected_fids)) {
       foreach ($selected_fids as $fid) {
         $file_entity = File::load($fid);
+
+        $file_name = $file_entity->getFilename();
+        $filenames[] = $file_name;
+
         $email->attachFromPath(
           $file_entity->getFileUri(),
-          $file_entity->getFilename(),
+          $file_name,
           $file_entity->getMimeType()
         );
       }
@@ -129,8 +134,16 @@ class DocumentEmailForm extends PlanningWorkflowFormBase {
     // Send the email.
     $this->mailer->send($email);
 
-    // Display a message.
-    $this->messenger()->addMessage($this->t('Email sent to %email.', ['%email' => $email_address]));
+    // Construct success message.
+    $filenames_str = implode(', ', $filenames);
+    $success_message = 'Document(s) emailed to %email: %filenames';
+
+    // Update plan's revision log message.
+    $this->plan->setRevisionLogMessage($this->t($success_message, ['%email' => $email_address, '%filenames' => $filenames_str]));
+    $this->plan->save();
+
+    // Display message.
+    $this->messenger()->addMessage($this->t($success_message, ['%email' => $email_address, '%filenames' => $filenames_str]));
   }
 
 }

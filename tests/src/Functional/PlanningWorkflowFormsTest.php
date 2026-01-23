@@ -1058,6 +1058,7 @@ class PlanningWorkflowFormsTest extends RcdTestBase {
     $this->assertSession()->pageTextContains('test.pdf');
 
     // @todo Test email sending.
+    // @todo Test plan revision message update on email send.
   }
 
   /**
