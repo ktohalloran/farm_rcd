@@ -108,6 +108,16 @@ class PracticesReportForm extends FormBase {
         $items[] = $this->t('Total farms: %count', ['%count' => count($results['farms'])]);
       }
 
+      // Total acreage.
+      if (!empty($results['acreage'])) {
+        $items[] = $this->t('Total acreage: %total', ['%total' => $results['acreage']]);
+      }
+
+      // Total acreage.
+      if (!empty($results['linear_feet'])) {
+        $items[] = $this->t('Total linear feet: %total', ['%total' => $results['linear_feet']]);
+      }
+
       // Render the list of results.
       $form['results']['items'] = [
         '#theme' => 'item_list',
@@ -207,6 +217,26 @@ class PracticesReportForm extends FormBase {
       }
       if (!in_array($farm_id, $context['results']['farms'])) {
         $context['results']['farms'][] = $farm_id;
+      }
+    }
+
+    // Save the plan acreage.
+    if (!$plan->get('rcd_acres')->isEmpty()) {
+      $acres = $plan->get('rcd_acres')->value;
+      if (!isset($context['results']['acreage'])) {
+        $context['results']['acreage'] = $acres;
+      } else {
+        $context['results']['acreage'] += $acres;
+      }
+    }
+
+    // Save the plan linear feet.
+    if (!$plan->get('rcd_linear_feet')->isEmpty()) {
+      $linear_ft = $plan->get('rcd_linear_feet')->value;
+      if (!isset($context['results']['linear_feet'])) {
+        $context['results']['linear_feet'] = $linear_ft;
+      } else {
+        $context['results']['linear_feet'] += $linear_ft;
       }
     }
   }
