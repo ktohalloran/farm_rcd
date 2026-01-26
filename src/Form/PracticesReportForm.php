@@ -153,10 +153,20 @@ class PracticesReportForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
-    // Get RCPs associated with intake logs that include the selected groups.
-    // If the user has selected any demographic groups, get RCPs that have an associated intake
-    // submitted by a stakeholder of that group.
-    $imp_plan_ids = [];
+    // Run an entity query to find matching plans.
+    // @phpstan-ignore method.alreadyNarrowedType
+    $query = $this->entityTypeManager->getStorage('plan')->getQuery()->accessCheck(TRUE);
+    $query->condition('type', 'rcd_practice_implementation');
+
+    if (!empty($form_state->getValue('practice'))) {
+      $query->condition('rcd_practice', $form_state->getValue('practice'));
+    }
+    if (!empty($form_state->getValue('status'))) {
+      $query->condition('status', $form_state->getValue('status'));
+    }
+    $plan_ids = $query->execute();
+
+    // Get selected groups.
     $selected_groups = [];
 
     if (!empty($form_state->getValue('stakeholder_groups'))) {
@@ -166,34 +176,7 @@ class PracticesReportForm extends FormBase {
           $selected_groups[] = $group;
         }
       }
-      $rcp_query = $this->entityTypeManager->getStorage('plan')->getQuery()->accessCheck(TRUE);
-      $rcp_query->condition('type', 'rcd_rcp');
-      $rcp_query->condition('intake.entity.intake_stakeholder_group', $selected_groups, 'IN');
-      $rcp_plan_ids = $rcp_query->execute();
-
-      // Get the ids of implementation plans associated with one of the RCPs.
-      $rcp_plans = $this->entityTypeManager->getStorage('plan')->loadMultiple($rcp_plan_ids);
-      foreach ($rcp_plans as $rcp) {
-        $rcd_ips = array_column($rcp->get('practice_implementation_plan')->getValue(), 'target_id');
-        $imp_plan_ids = array_merge($imp_plan_ids, $rcd_ips);
-      }
     }
-
-    // @phpstan-ignore method.alreadyNarrowedType
-    $ip_query = $this->entityTypeManager->getStorage('plan')->getQuery()->accessCheck(TRUE);
-    $ip_query->condition('type', 'rcd_practice_implementation');
-
-    // Limit to plans with associated stakeholder groups, if available.
-    if (!empty($selected_groups) && count($imp_plan_ids)) {
-      $ip_query->condition('id', $imp_plan_ids, 'IN');
-    }
-    if (!empty($form_state->getValue('practice'))) {
-      $ip_query->condition('rcd_practice', $form_state->getValue('practice'));
-    }
-    if (!empty($form_state->getValue('status'))) {
-      $ip_query->condition('status', $form_state->getValue('status'));
-    }
-    $plan_ids = $ip_query->execute();
 
     // Assemble batch operations.
     $operations = [];
@@ -223,11 +206,27 @@ class PracticesReportForm extends FormBase {
    */
   public static function analyzePlan(int $id, array $groups, array &$context): void {
 
+    // If there are stakeholder groups selected, determine whether the given plan
+    // is associated with a stakeholder of one of the selected groups.
+    $rcp_plan_id = [];
+    if (count($groups)) {
+      $rcp_query = \Drupal::entityTypeManager()->getStorage('plan')->getQuery()->accessCheck(TRUE);
+      $rcp_query->condition('type', 'rcd_rcp');
+      $rcp_query->condition('practice_implementation_plan.target_id', $id, 'IN');
+      $rcp_query->condition('intake.entity.intake_stakeholder_group', $groups, 'IN');
+      $rcp_plan_id = $rcp_query->count()->execute();
+    }
+
+    // If the plan doesn't meet the demographic requirement, just return.
+    if (!$rcp_plan_id) {
+      return;
+    }
+
     // Save the plan ID and list of selected demographic groups.
     $context['results']['plan_ids'][] = $id;
     $context['results']['stakeholder_groups'] = $groups;
 
-    // Load the plan.
+    // Load the implementation plan.
     $plan = \Drupal::entityTypeManager()->getStorage('plan')->load($id);
 
     // Save the practice.
@@ -245,7 +244,6 @@ class PracticesReportForm extends FormBase {
         }
       }
     }
-    \Drupal::logger('farm_rcd')->debug(print_r($context['results']['practices'], TRUE));
 
     // Save the plan status.
     if (!$plan->get('status')->isEmpty()) {
