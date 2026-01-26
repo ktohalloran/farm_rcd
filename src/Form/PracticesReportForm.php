@@ -10,6 +10,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\farm_rcd\ConservationPractices;
+use Drupal\farm_rcd\RcdOptionLists;
 use Drupal\plan\Entity\PlanInterface;
 
 /**
@@ -61,6 +62,13 @@ class PracticesReportForm extends FormBase {
       '#options' => array_merge([NULL => ''], $state_item->getPossibleOptions()),
     ];
 
+    // Stakeholder groups.
+    $form['stakeholder_groups'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Stakeholder groups'),
+      '#options' => RcdOptionLists::stakeholderGroups(),
+    ];
+
     // Submit button.
     $form['submit'] = [
       '#type' => 'submit',
@@ -98,6 +106,18 @@ class PracticesReportForm extends FormBase {
         $items[] = $this->t('Status of implementations: %status', ['%status' => implode(', ', $results['status'])]);
       }
 
+      // Stakeholder groups.
+      if (!empty($results['stakeholder_groups'])) {
+        $group_names = [];
+
+        // Get group names.
+        foreach ($results['stakeholder_groups'] as $group_id) {
+          $groups = RcdOptionLists::stakeholderGroups();
+          $group_names[] = $groups[$group_id];
+        }
+        $items[] = $this->t('Stakeholder groups: %groups', ['%groups' => implode(', ', $group_names)]);
+      }
+
       // Total practices.
       if (!empty($results['plan_ids'])) {
         $items[] = $this->t('Total implementation plans: %count', ['%count' => count($results['plan_ids'])]);
@@ -133,24 +153,54 @@ class PracticesReportForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
-    // Run an entity query to find matching plans.
+    // Get RCPs associated with intake logs that include the selected groups.
+    // If the user has selected any demographic groups, get RCPs that have an associated intake
+    // submitted by a stakeholder of that group.
+    $imp_plan_ids = [];
+    $selected_groups = [];
+
+    if (!empty($form_state->getValue('stakeholder_groups'))) {
+      // Remove groups that were not checked.
+      foreach($form_state->getValue('stakeholder_groups') as $group => $checked) {
+        if ($checked) {
+          $selected_groups[] = $group;
+        }
+      }
+      $rcp_query = $this->entityTypeManager->getStorage('plan')->getQuery()->accessCheck(TRUE);
+      $rcp_query->condition('type', 'rcd_rcp');
+      $rcp_query->condition('intake.entity.intake_stakeholder_group', $selected_groups, 'IN');
+      $rcp_plan_ids = $rcp_query->execute();
+
+      // Get the ids of implementation plans associated with one of the RCPs.
+      $rcp_plans = $this->entityTypeManager->getStorage('plan')->loadMultiple($rcp_plan_ids);
+      foreach ($rcp_plans as $rcp) {
+        $rcd_ips = array_column($rcp->get('practice_implementation_plan')->getValue(), 'target_id');
+        $imp_plan_ids = array_merge($imp_plan_ids, $rcd_ips);
+      }
+    }
+
     // @phpstan-ignore method.alreadyNarrowedType
-    $query = $this->entityTypeManager->getStorage('plan')->getQuery()->accessCheck(TRUE);
-    $query->condition('type', 'rcd_practice_implementation');
+    $ip_query = $this->entityTypeManager->getStorage('plan')->getQuery()->accessCheck(TRUE);
+    $ip_query->condition('type', 'rcd_practice_implementation');
+
+    // Limit to plans with associated stakeholder groups, if available.
+    if (!empty($selected_groups) && count($imp_plan_ids)) {
+      $ip_query->condition('id', $imp_plan_ids, 'IN');
+    }
     if (!empty($form_state->getValue('practice'))) {
-      $query->condition('rcd_practice', $form_state->getValue('practice'));
+      $ip_query->condition('rcd_practice', $form_state->getValue('practice'));
     }
     if (!empty($form_state->getValue('status'))) {
-      $query->condition('status', $form_state->getValue('status'));
+      $ip_query->condition('status', $form_state->getValue('status'));
     }
-    $plan_ids = $query->execute();
+    $plan_ids = $ip_query->execute();
 
     // Assemble batch operations.
     $operations = [];
     foreach ($plan_ids as $plan_id) {
       $operations[] = [
         [self::class, 'analyzePlan'],
-        [$plan_id],
+        [$plan_id, $selected_groups],
       ];
     }
 
@@ -171,10 +221,11 @@ class PracticesReportForm extends FormBase {
    * @param array $context
    *   The batch operation context, passed by reference.
    */
-  public static function analyzePlan(int $id, array &$context): void {
+  public static function analyzePlan(int $id, array $groups, array &$context): void {
 
-    // Save the plan ID.
+    // Save the plan ID and list of selected demographic groups.
     $context['results']['plan_ids'][] = $id;
+    $context['results']['stakeholder_groups'] = $groups;
 
     // Load the plan.
     $plan = \Drupal::entityTypeManager()->getStorage('plan')->load($id);
@@ -194,6 +245,7 @@ class PracticesReportForm extends FormBase {
         }
       }
     }
+    \Drupal::logger('farm_rcd')->debug(print_r($context['results']['practices'], TRUE));
 
     // Save the plan status.
     if (!$plan->get('status')->isEmpty()) {
@@ -207,6 +259,8 @@ class PracticesReportForm extends FormBase {
         $context['results']['status'][] = $status;
       }
     }
+
+    // Save the selected demographic groups.
 
     // Save the plan farm.
     if (!$plan->get('farm')->isEmpty()) {
