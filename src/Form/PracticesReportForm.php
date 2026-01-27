@@ -217,8 +217,9 @@ class PracticesReportForm extends FormBase {
       $rcp_plan_id = $rcp_query->count()->execute();
     }
 
-    // If the plan doesn't meet the demographic requirement, just return.
-    if (!$rcp_plan_id) {
+    // If stakeholder filters were selected and the plan doesn't meet the
+    // requirement, just return.
+    if (count($groups) && !$rcp_plan_id) {
       return;
     }
 

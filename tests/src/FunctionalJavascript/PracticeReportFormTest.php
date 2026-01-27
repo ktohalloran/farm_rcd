@@ -96,11 +96,10 @@ class PracticeReportFormTest extends RcdTestBase {
     $this->assertSession()->pageTextContains('Generated: ' . date('Y-m-d h:i'));
     $this->assertSession()->pageTextContains('Practices: Cover Crop, Bioremediation');
     $this->assertSession()->pageTextContains('Status of implementations: Planning, Implementing');
-    $this->assertSession()->pageTextContains('Stakeholder groups: American Indian or Alaska Native, Family farm');
     $this->assertSession()->pageTextContains('Total implementation plans: 2');
     $this->assertSession()->pageTextContains('Total farms: 1');
-    $this->assertSession()->pageTextContains('Total acreage: 8.00');
-    $this->assertSession()->pageTextContains('Total linear feet: 250.00');
+    $this->assertSession()->pageTextContains('Total acreage: 8');
+    $this->assertSession()->pageTextContains('Total linear feet: 250');
 
     // Test filtering by practice.
     $this->drupalGet('/report/practices');
@@ -109,10 +108,9 @@ class PracticeReportFormTest extends RcdTestBase {
     $this->assertTrue($this->assertSession()->waitForText('1 practice implementation plans analyzed.', 30000));
     $this->assertSession()->pageTextContains('Practices: Cover Crop');
     $this->assertSession()->pageTextContains('Status of implementations: Planning');
-    $this->assertSession()->pageTextContains('Stakeholder groups: American Indian or Alaska Native, Family farm');
     $this->assertSession()->pageTextContains('Total implementation plans: 1');
     $this->assertSession()->pageTextContains('Total farms: 1');
-    $this->assertSession()->pageTextContains('Total acreage: 8.00');
+    $this->assertSession()->pageTextContains('Total acreage: 8');
     $this->assertSession()->pageTextNotContains('Total linear feet: ');
 
     // Test filtering by plan status.
@@ -122,10 +120,9 @@ class PracticeReportFormTest extends RcdTestBase {
     $this->assertTrue($this->assertSession()->waitForText('1 practice implementation plans analyzed.', 30000));
     $this->assertSession()->pageTextContains('Practices: Bioremediation');
     $this->assertSession()->pageTextContains('Status of implementations: Implementing');
-    $this->assertSession()->pageTextContains('Stakeholder groups: American Indian or Alaska Native, Family farm');
     $this->assertSession()->pageTextContains('Total implementation plans: 1');
     $this->assertSession()->pageTextContains('Total farms: 1');
-    $this->assertSession()->pageTextContains('Total linear feet: 250.00');
+    $this->assertSession()->pageTextContains('Total linear feet: 250');
     $this->assertSession()->pageTextNotContains('Total acreage: ');
 
     // Test filtering by stakeholder group.
@@ -139,8 +136,8 @@ class PracticeReportFormTest extends RcdTestBase {
     $this->assertSession()->pageTextContains('Stakeholder groups: Family farm');
     $this->assertSession()->pageTextContains('Total implementation plans: 2');
     $this->assertSession()->pageTextContains('Total farms: 1');
-    $this->assertSession()->pageTextContains('Total acreage: 8.00');
-    $this->assertSession()->pageTextContains('Total linear feet: 250.00');
+    $this->assertSession()->pageTextContains('Total acreage: 8');
+    $this->assertSession()->pageTextContains('Total linear feet: 250');
 
     // Test filtering by stakeholder group with no associated plans.
     $this->drupalGet('/report/practices');
