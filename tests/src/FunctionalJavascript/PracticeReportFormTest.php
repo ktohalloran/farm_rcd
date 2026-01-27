@@ -14,6 +14,8 @@ class PracticeReportFormTest extends RcdTestBase {
    */
   public function testPracticeReportForm() {
     $plan_storage = \Drupal::entityTypeManager()->getStorage('plan');
+    $log_storage = \Drupal::entityTypeManager()->getStorage('log');
+    $org_storage = \Drupal::entityTypeManager()->getStorage('organization');
 
     // Confirm that the practice report form is accessible.
     $this->drupalGet('/report/practices');
@@ -30,22 +32,61 @@ class PracticeReportFormTest extends RcdTestBase {
     $this->assertSession()->pageTextNotContains('Practices: ');
     $this->assertSession()->pageTextNotContains('Status of implementations: ');
 
+    // Create a farm organization.
+    /** @var \Drupal\organization\Entity\OrganizationInterface $farm */
+    $farm = $org_storage->create([
+      'type' => 'farm',
+      'name' => $this->randomMachineName(),
+    ]);
+    $farm->save();
+
+    // Create an intake log with minimum data for these tests.
+    /** @var \Drupal\log\Entity\LogInterface $intake */
+    $intake = $log_storage->create([
+      'type' => 'rcd_intake',
+      'intake_property_street' => '123 Fake Street',
+      'intake_property_city' => 'Fake City',
+      'intake_property_state' => 'AL',
+      'intake_property_zip' => '123456',
+      'intake_property_parcel_gps' => 'Parcel 123',
+      'intake_stakeholder_group' => [
+        'native',
+        'family'
+      ]
+    ]);
+    $intake->save();
+
     // Create two practice implementation plans.
     $plan1 = $plan_storage->create([
       'type' => 'rcd_practice_implementation',
+      'farm' => [$farm],
       'rcd_practice' => 'cover_crop',
+      'rcd_acreage' => 8,
       'name' => $this->randomMachineName(),
       'status' => 'planning',
     ]);
     $plan1->save();
     $plan2 = $plan_storage->create([
       'type' => 'rcd_practice_implementation',
+      'farm' => [$farm],
       'rcd_practice' => 'other',
       'rcd_practice_other' => 'Bioremediation',
+      'rcd_linear_feet' => 250,
       'name' => $this->randomMachineName(),
       'status' => 'implementing',
     ]);
     $plan2->save();
+
+    // Create a resource conservation plan associated with the farm and intake.
+    /** @var \Drupal\plan\Entity\PlanInterface $plan */
+    $rcp_plan = $plan_storage->create([
+      'type' => 'rcd_rcp',
+      'name' => $this->randomMachineName(),
+      'farm' => [$farm],
+      'intake' => [$intake],
+      'practice_implementation_plan' => [$plan1, $plan2],
+    ]);
+    $rcp_plan->save();
 
     // Resubmit the form, confirm that 2 plans were analyzed, and summary data
     // is displayed.
@@ -55,6 +96,11 @@ class PracticeReportFormTest extends RcdTestBase {
     $this->assertSession()->pageTextContains('Generated: ' . date('Y-m-d h:i'));
     $this->assertSession()->pageTextContains('Practices: Cover Crop, Bioremediation');
     $this->assertSession()->pageTextContains('Status of implementations: Planning, Implementing');
+    $this->assertSession()->pageTextContains('Stakeholder groups: American Indian or Alaska Native, Family farm');
+    $this->assertSession()->pageTextContains('Total implementation plans: 2');
+    $this->assertSession()->pageTextContains('Total farms: 1');
+    $this->assertSession()->pageTextContains('Total acreage: 8.00');
+    $this->assertSession()->pageTextContains('Total linear feet: 250.00');
 
     // Test filtering by practice.
     $this->drupalGet('/report/practices');
@@ -63,6 +109,11 @@ class PracticeReportFormTest extends RcdTestBase {
     $this->assertTrue($this->assertSession()->waitForText('1 practice implementation plans analyzed.', 30000));
     $this->assertSession()->pageTextContains('Practices: Cover Crop');
     $this->assertSession()->pageTextContains('Status of implementations: Planning');
+    $this->assertSession()->pageTextContains('Stakeholder groups: American Indian or Alaska Native, Family farm');
+    $this->assertSession()->pageTextContains('Total implementation plans: 1');
+    $this->assertSession()->pageTextContains('Total farms: 1');
+    $this->assertSession()->pageTextContains('Total acreage: 8.00');
+    $this->assertSession()->pageTextNotContains('Total linear feet: ');
 
     // Test filtering by plan status.
     $this->drupalGet('/report/practices');
@@ -71,6 +122,40 @@ class PracticeReportFormTest extends RcdTestBase {
     $this->assertTrue($this->assertSession()->waitForText('1 practice implementation plans analyzed.', 30000));
     $this->assertSession()->pageTextContains('Practices: Bioremediation');
     $this->assertSession()->pageTextContains('Status of implementations: Implementing');
+    $this->assertSession()->pageTextContains('Stakeholder groups: American Indian or Alaska Native, Family farm');
+    $this->assertSession()->pageTextContains('Total implementation plans: 1');
+    $this->assertSession()->pageTextContains('Total farms: 1');
+    $this->assertSession()->pageTextContains('Total linear feet: 250.00');
+    $this->assertSession()->pageTextNotContains('Total acreage: ');
+
+    // Test filtering by stakeholder group.
+    $this->drupalGet('/report/practices');
+    $this->getSession()->getPage()->fillField("stakeholder_groups['family']['checked']", TRUE);
+    $this->getSession()->getPage()->pressButton('Generate summary');
+    $this->assertTrue($this->assertSession()->waitForText('2 practice implementation plans analyzed.', 30000));
+    $this->assertSession()->pageTextContains('Generated: ' . date('Y-m-d h:i'));
+    $this->assertSession()->pageTextContains('Practices: Cover Crop, Bioremediation');
+    $this->assertSession()->pageTextContains('Status of implementations: Planning, Implementing');
+    $this->assertSession()->pageTextContains('Stakeholder groups: Family farm');
+    $this->assertSession()->pageTextContains('Total implementation plans: 2');
+    $this->assertSession()->pageTextContains('Total farms: 1');
+    $this->assertSession()->pageTextContains('Total acreage: 8.00');
+    $this->assertSession()->pageTextContains('Total linear feet: 250.00');
+
+    // Test filtering by stakeholder group with no associated plans.
+    $this->drupalGet('/report/practices');
+    $this->getSession()->getPage()->fillField("stakeholder_groups['veteran']['checked']", TRUE);
+    $this->getSession()->getPage()->pressButton('Generate summary');
+    $this->assertTrue($this->assertSession()->waitForText('0 practice implementation plans analyzed.', 30000));
+    $this->assertSession()->pageTextNotContains('Results');
+    $this->assertSession()->pageTextNotContains('Generated: ');
+    $this->assertSession()->pageTextNotContains('Practices: ');
+    $this->assertSession()->pageTextNotContains('Status of implementations: ');
+    $this->assertSession()->pageTextNotContains('Stakeholder groups: ');
+    $this->assertSession()->pageTextNotContains('Total implementation plans: ');
+    $this->assertSession()->pageTextNotContains('Total farms: ');
+    $this->assertSession()->pageTextNotContains('Total acreage: ');
+    $this->assertSession()->pageTextNotContains('Total linear feet: ');
   }
 
 }
