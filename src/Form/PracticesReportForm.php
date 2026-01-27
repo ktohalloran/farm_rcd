@@ -10,6 +10,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\farm_rcd\ConservationPractices;
+use Drupal\farm_rcd\RcdOptionLists;
 use Drupal\plan\Entity\PlanInterface;
 
 /**
@@ -97,6 +98,18 @@ class PracticesReportForm extends FormBase {
       if (!empty($results['status'])) {
         $items[] = $this->t('Status of implementations: %status', ['%status' => implode(', ', $results['status'])]);
       }
+
+//      // Stakeholder groups.
+//      if (!empty($results['stakeholder_groups'])) {
+//        $group_names = [];
+//
+//        // Get group names.
+//        foreach ($results['stakeholder_groups'] as $group_id) {
+//          $groups = RcdOptionLists::stakeholderGroups();
+//          $group_names[] = $groups[$group_id];
+//        }
+//        $items[] = $this->t('Stakeholder groups: %groups', ['%groups' => implode(', ', $group_names)]);
+//      }
 
       // Total practices.
       if (!empty($results['plan_ids'])) {
@@ -205,6 +218,29 @@ class PracticesReportForm extends FormBase {
       }
       if (!in_array($status, $context['results']['status'])) {
         $context['results']['status'][] = $status;
+      }
+    }
+
+    // Save the plan's associated stakeholder groups.
+    // Get RCP associated with the implementation plan.
+    $rcp_query = \Drupal::entityTypeManager()->getStorage('plan')->getQuery()->accessCheck(TRUE);
+    $rcp_query->condition('type', 'rcd_rcp');
+    $rcp_query->condition('practice_implementation_plan.target_id', $id);
+    $rcp_ids = $rcp_query->execute();
+    $rcp_id = current($rcp_ids);
+
+    // Use the RCP to get the intake log and its stakeholder groups.
+    $rcp = \Drupal::entityTypeManager()->getStorage('plan')->load($rcp_id);
+    $intake = $rcp->get('intake')->referencedEntities()[0];
+    $stakeholder_groups = $intake->get('intake_stakeholder_group')->getValue();
+
+    // Save stakeholder group.
+    foreach ($stakeholder_groups as $group) {
+      if (!isset($context['results']['stakeholder_groups'])) {
+        $context['results']['stakeholder_groups'][] = [];
+      }
+      if (!in_array($group, $context['results']['stakeholder_groups'])) {
+        $context['results']['stakeholder_groups'][] = $group;
       }
     }
 
