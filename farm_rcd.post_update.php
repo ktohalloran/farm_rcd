@@ -10,6 +10,7 @@ declare(strict_types=1);
 use Drupal\farm_map\Entity\MapBehavior;
 use Drupal\farm_map\Entity\MapType;
 use Drupal\symfony_mailer_lite\Entity\Transport;
+use \Drupal\taxonomy\Entity\Vocabulary;
 
 /**
  * Add acreage and linear feet measurements to practice implementation plans.
@@ -267,5 +268,21 @@ function farm_rcd_post_update_add_implementation_timeline(&$sandbox) {
 function farm_rcd_post_update_install_farm_report(&$sandbox = NULL) {
   if (!\Drupal::service('module_handler')->moduleExists('farm_report')) {
     \Drupal::service('module_installer')->install(['farm_report']);
+  }
+}
+
+/**
+ * Add funding source taxonomy term vocabulary.
+ */
+function farm_rcd_post_update_create_funding_source_taxonomy(&$sandbox = NULL) {
+  $vid = 'rcd_funding_source';
+
+  // If vocabulary doesn't already exist, create it.
+  if (!Vocabulary::load($vid)) {
+    $vocab = Vocabulary::create([
+      'vid' => $vid,
+      'name' => 'Funding source',
+    ]);
+    $vocab->save();
   }
 }
