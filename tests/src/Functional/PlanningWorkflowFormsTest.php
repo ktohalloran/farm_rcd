@@ -756,6 +756,7 @@ class PlanningWorkflowFormsTest extends RcdTestBase {
     $this->assertSession()->fieldValueEquals('practices[' . $practice_plan->id() . '][linear_feet]', '100.00');
     $this->assertSession()->fieldValueEquals('practices[' . $practice_plan->id() . '][target_start_date]', '');
     $this->assertSession()->fieldValueEquals('practices[' . $practice_plan->id() . '][target_end_date]', '');
+    // @todo Test funding source taxonomy terms (Tagify requires JavaScript).
     $this->assertSession()->fieldValueEquals('practices[' . $practice_plan->id() . '][notes]', $expected_notes);
     $this->assertSession()->fieldValueEquals('practices[' . $practice_plan->id() . '][status]', 'planning');
 
