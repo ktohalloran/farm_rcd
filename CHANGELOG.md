@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - [Zoom to property in land use areas form #104](https://github.com/farmier/farm_rcd/issues/104)
+- [Change funding source (text) to a taxonomy reference #107](https://github.com/farmier/farm_rcd/issues/107)
 
 ## [1.2.0] 2026-01-21
 
