@@ -12,7 +12,7 @@ use Drupal\farm_map\Entity\MapBehavior;
 use Drupal\farm_map\Entity\MapType;
 use Drupal\symfony_mailer_lite\Entity\Transport;
 use Drupal\taxonomy\Entity\Term;
-use \Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\taxonomy\Entity\Vocabulary;
 
 /**
  * Add acreage and linear feet measurements to practice implementation plans.
@@ -335,7 +335,8 @@ function farm_rcd_post_update_migrate_funding_source(&$sandbox) {
     $field_definition = \Drupal::service('farm_field.factory')->bundleFieldDefinition($options);
     $update_manager->installFieldStorageDefinition('rcd_funding_source', 'plan', 'farm_rcd', $field_definition);
 
-    // If there are no implementation plans with funding source field values, bail.
+    // If there are no implementation plans with funding source field
+    // values, bail.
     if (empty($sandbox['plan_map'])) {
       return NULL;
     }

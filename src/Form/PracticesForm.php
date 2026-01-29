@@ -508,7 +508,8 @@ class PracticesForm extends PlanningWorkflowFormBase {
     $name = 'funding_source';
     $vid = 'rcd_' . $name;
     $existing_ids = array_map(function ($term) {
-      return $term->id();}, $plan->get($vid)->referencedEntities()
+      return $term->id();
+    }, $plan->get($vid)->referencedEntities()
     );
     $updated_terms = [];
     $updated_ids = [];
@@ -521,16 +522,16 @@ class PracticesForm extends PlanningWorkflowFormBase {
           return $this->createOrLoadTerm($value['value'], $vid);
         }
         return NULL;
-        }, json_decode($values[$name], TRUE) ?? []);
-        $updated_ids = array_map(function ($term) {
-          return $term->id();
-        }, $updated_terms);
-      }
-      if (!(empty(array_diff($existing_ids, $updated_ids)) && empty(array_diff($updated_ids, $existing_ids)))) {
-        $plan->set($vid, []);
-        $plan->set($vid, $updated_terms);
-        $changed = TRUE;
-      }
+      }, json_decode($values[$name], TRUE) ?? []);
+      $updated_ids = array_map(function ($term) {
+        return $term->id();
+      }, $updated_terms);
+    }
+    if (!(empty(array_diff($existing_ids, $updated_ids)) && empty(array_diff($updated_ids, $existing_ids)))) {
+      $plan->set($vid, []);
+      $plan->set($vid, $updated_terms);
+      $changed = TRUE;
+    }
 
     // If the plan is new, populate the notes with a generic description of the
     // practice.
