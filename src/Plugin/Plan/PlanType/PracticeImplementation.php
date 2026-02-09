@@ -49,6 +49,11 @@ class PracticeImplementation extends FarmPlanType {
         'required' => TRUE,
       ],
 
+      'geometry' => [
+        'type' => 'geofield',
+        'label' => $this->t('Geometry'),
+      ],
+
       // Conservation practice.
       'rcd_practice' => [
         'type' => 'list_string',

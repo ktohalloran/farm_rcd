@@ -388,3 +388,16 @@ function farm_rcd_post_update_migrate_funding_source(&$sandbox) {
   $sandbox['#finished'] = $sandbox['current_plan'] / count($sandbox['plan_map']);
   return NULL;
 }
+
+/**
+ * Add practice implementation geometry field.
+ */
+function farm_rcd_post_update_practice_implementation_geometry(&$sandbox) {
+  // Add practice implementation geometry.
+  $options = [
+    'type' => 'geofield',
+    'label' => t('Geometry'),
+  ];
+  $field_definition = \Drupal::service('farm_field.factory')->bundleFieldDefinition($options);
+  \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('geometry', 'plan', 'farm_rcd', $field_definition);
+}
