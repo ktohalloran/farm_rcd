@@ -204,6 +204,17 @@ class PracticesForm extends PlanningWorkflowFormBase {
       '#description' => $this->t('Draw the implementation geometry using the map below, or paste geometry data (WKT, KML, or GeoJSON) into the box below the map.'),
       '#display_raw_geometry' => TRUE,
       '#default_value' => $plan?->get('geometry')->value,
+      '#map_type' => 'rcd',
+      '#behaviors' => [
+        'rcd_property_zoom',
+      ],
+      '#map_settings' => [
+        'behaviors' => [
+          'rcd_property_zoom' => [
+            'property_geometry' => $this->property->get('geometry')->value,
+          ],
+        ],
+      ],
     ];
 
     // Acreage/linear feet.
