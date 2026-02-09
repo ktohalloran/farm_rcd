@@ -161,7 +161,7 @@ class PracticesForm extends PlanningWorkflowFormBase {
       $form['location']['#default_value'] = NULL;
     }
 
-    // Build the name prefix of this sub-form for #states below.
+      // Build the name prefix of this sub-form for #states below.
     $states_name_prefix = !is_null($plan) ? 'practices[' . $plan->id() . ']' : 'practices[add]';
 
     // Practice.
@@ -195,6 +195,15 @@ class PracticesForm extends PlanningWorkflowFormBase {
           ':input[name="' . $states_name_prefix . '[practice]"]' => ['value' => 'other'],
         ],
       ],
+    ];
+
+    // Implementation geometry.
+    $form['implementation_geometry'] = [
+      '#type' => 'farm_map_input',
+      '#title' => $this->t('Implementation geometry'),
+      '#description' => $this->t('Draw the implementation geometry using the map below, or paste geometry data (WKT, KML, or GeoJSON) into the box below the map.'),
+      '#display_raw_geometry' => TRUE,
+      '#default_value' => $plan?->get('geometry')->value,
     ];
 
     // Acreage/linear feet.
@@ -478,6 +487,7 @@ class PracticesForm extends PlanningWorkflowFormBase {
     $field_values = [
       'rcd_practice' => 'practice',
       'rcd_practice_other' => 'practice_other',
+      'geometry' => 'implementation_geometry',
       'rcd_acres' => 'acreage',
       'rcd_linear_feet' => 'linear_feet',
       'rcd_target_start_date' => 'target_start_date',
